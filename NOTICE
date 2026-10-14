@@ -1,0 +1,13 @@
+pubgrub-go contains a Go adaptation of astral-pubgrub and astral-version-ranges.
+
+Reference: https://github.com/astral-sh/pubgrub
+Commit: e4ae64d371a25df953d42d9f0e8e0d43d8e79e6e
+Declared versions: astral-pubgrub 0.6.1, astral-version-ranges 0.2.2
+License: Mozilla Public License 2.0
+
+Upstream Cargo metadata credits Matthieu Pizenberg, Alex Tokarev and
+Jacob Finkelman. The Astral fork and additional upstream contributors are
+credited in the source repository's history.
+
+The optional SemVer adapter follows the behavior of Rust's semver library
+and the conversions defined in astral-version-ranges.

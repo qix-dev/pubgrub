@@ -27,6 +27,61 @@ func TestBoundsAndDisplay(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+func TestBoundingRange(t *testing.T) {
+	cases := []struct {
+		name string
+		set  ranges.Ranges[int]
+		want ranges.Interval[int]
+		ok   bool
+	}{
+		{"empty", ints.Empty(), ranges.Interval[int]{}, false},
+		{"singleton", ints.Singleton(3), ranges.Interval[int]{Start: ranges.Include(3), End: ranges.Include(3)}, true},
+		{"bounded", ints.Between(1, 4), ranges.Interval[int]{Start: ranges.Include(1), End: ranges.Exclude(4)}, true},
+		{"disconnected", ints.Between(1, 4).Union(ints.Singleton(6)), ranges.Interval[int]{Start: ranges.Include(1), End: ranges.Include(6)}, true},
+		{"open ends", ints.FromBounds(ranges.Exclude(1), ranges.Exclude(4)), ranges.Interval[int]{Start: ranges.Exclude(1), End: ranges.Exclude(4)}, true},
+		{"unbounded below", ints.LowerThan(4), ranges.Interval[int]{Start: ranges.Unbound[int](), End: ranges.Include(4)}, true},
+		{"unbounded above", ints.HigherThan(1), ranges.Interval[int]{Start: ranges.Include(1), End: ranges.Unbound[int]()}, true},
+		{"full", ints.Full(), ranges.Interval[int]{Start: ranges.Unbound[int](), End: ranges.Unbound[int]()}, true},
+		{"unbounded with gap", ints.StrictlyLowerThan(1).Union(ints.StrictlyHigherThan(4)), ranges.Interval[int]{Start: ranges.Unbound[int](), End: ranges.Unbound[int]()}, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, ok := c.set.BoundingRange()
+			if ok != c.ok || got != c.want {
+				t.Fatalf("BoundingRange(%s) = %+v, %v; want %+v, %v", c.set, got, ok, c.want, c.ok)
+			}
+		})
+	}
+}
+func TestRangeRelation(t *testing.T) {
+	cases := []struct {
+		name    string
+		a, b    ranges.Ranges[int]
+		forward ranges.Relation
+		reverse ranges.Relation
+	}{
+		// Empty sets are subsets even when they are also disjoint.
+		{"both empty", ints.Empty(), ints.Empty(), ranges.Subset, ranges.Subset},
+		{"empty and nonempty", ints.Empty(), ints.Singleton(1), ranges.Subset, ranges.Disjoint},
+		{"equal", ints.Between(1, 4), ints.Between(1, 4), ranges.Subset, ranges.Subset},
+		{"proper subset", ints.Between(2, 3), ints.Between(1, 4), ranges.Subset, ranges.Overlapping},
+		{"full set", ints.Between(1, 4), ints.Full(), ranges.Subset, ranges.Overlapping},
+		{"partial overlap", ints.Between(1, 4), ints.Between(3, 6), ranges.Overlapping, ranges.Overlapping},
+		{"excluded boundary", ints.Between(1, 3), ints.Between(3, 5), ranges.Disjoint, ranges.Disjoint},
+		{"included boundary", ints.LowerThan(3), ints.HigherThan(3), ranges.Overlapping, ranges.Overlapping},
+		{"gap", ints.Singleton(1).Union(ints.Singleton(5)), ints.Between(2, 4), ranges.Disjoint, ranges.Disjoint},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := c.a.Relation(c.b); got != c.forward {
+				t.Fatalf("(%s).Relation(%s) = %v; want %v", c.a, c.b, got, c.forward)
+			}
+			if got := c.b.Relation(c.a); got != c.reverse {
+				t.Fatalf("(%s).Relation(%s) = %v; want %v", c.b, c.a, got, c.reverse)
+			}
+		})
+	}
+}
 func TestWidenAndNarrow(t *testing.T) {
 	versions := []int{1, 2, 3, 4}
 	set := ints.Singleton(2).Union(ints.Singleton(3))

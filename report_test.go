@@ -50,6 +50,60 @@ func TestReportUnsharedBranches(t *testing.T) {
 	}
 }
 
+func TestReportExternalAfterDerivedBranches(t *testing.T) {
+	left := &proof{Derived: &derived{
+		Terms:  proofTerms{{Package: "a", Term: pubgrub.Positive[int](sets.Singleton(1))}},
+		Cause1: &proof{External: &external{Kind: pubgrub.ExternalDependency, Package: "a", Versions: sets.Singleton(1), Dependency: "b", DependencyVersions: sets.Singleton(1)}},
+		Cause2: &proof{External: &external{Kind: pubgrub.ExternalNoVersions, Package: "b", Versions: sets.Singleton(1)}},
+	}}
+	right := &proof{Derived: &derived{
+		Terms:  proofTerms{{Package: "a", Term: pubgrub.Positive[int](sets.Singleton(2))}},
+		Cause1: &proof{External: &external{Kind: pubgrub.ExternalDependency, Package: "a", Versions: sets.Singleton(2), Dependency: "c", DependencyVersions: sets.Singleton(1)}},
+		Cause2: &proof{External: &external{Kind: pubgrub.ExternalNoVersions, Package: "c", Versions: sets.Singleton(1)}},
+	}}
+	versions := sets.Singleton(1).Union(sets.Singleton(2))
+	branch := &proof{Derived: &derived{
+		Terms:  proofTerms{{Package: "a", Term: pubgrub.Positive[int](versions)}},
+		Cause1: left, Cause2: right,
+	}}
+	requirement := &proof{External: &external{
+		Kind: pubgrub.ExternalDependency, Package: "root", Versions: sets.Singleton(1),
+		Dependency: "a", DependencyVersions: versions,
+	}}
+	prefix := "Because a 1 depends on b 1 and there is no version of b in 1, a 1 is forbidden. (1)\n\n" +
+		"Because a 2 depends on c 1 and there is no version of c in 1, a 2 is forbidden.\n" +
+		"And because a 1 is forbidden (1), a 1 | 2 is forbidden.\n"
+	continuation := "And because root 1 depends on a 1 | 2, root 1 is forbidden."
+	for _, swapped := range []bool{false, true} {
+		name := "derived then external"
+		first, second := branch, requirement
+		if swapped {
+			name = "external then derived"
+			first, second = second, first
+		}
+		t.Run(name, func(t *testing.T) {
+			tree := &proof{Derived: &derived{
+				Terms:  proofTerms{{Package: "root", Term: pubgrub.Positive[int](sets.Singleton(1))}},
+				Cause1: first, Cause2: second,
+			}}
+			if got, want := pubgrub.Report(tree), prefix+continuation; got != want {
+				t.Fatalf("got:\n%s\nwant:\n%s", got, want)
+			}
+			if got, want := pubgrub.ReportWithFormatter(tree, continuationFormatter{}), prefix+strings.ToUpper(continuation); got != want {
+				t.Fatalf("custom formatter got:\n%s\nwant:\n%s", got, want)
+			}
+		})
+	}
+}
+
+type continuationFormatter struct {
+	pubgrub.DefaultStringReportFormatter[string, int, intSet, string]
+}
+
+func (f continuationFormatter) AndExplainExternal(e *external, terms proofTerms) string {
+	return strings.ToUpper(f.DefaultStringReportFormatter.AndExplainExternal(e, terms))
+}
+
 // The formatter is a user extension point; verify it controls the completed
 // explanation rather than only the external leaves.
 type customFormatter struct {

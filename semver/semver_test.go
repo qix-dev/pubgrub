@@ -62,3 +62,40 @@ func TestInvalidRequirement(t *testing.T) {
 		t.Fatal("numeric component after wildcard accepted")
 	}
 }
+func TestVersionText(t *testing.T) {
+	cases := []struct {
+		version semver.Version
+		text    string
+	}{
+		{semver.Version{}, "0.0.0"},
+		{semver.New(1, 2, 3), "1.2.3"},
+		{semver.Version{Major: 1, Minor: 2, Patch: 3, Pre: "rc.2"}, "1.2.3-rc.2"},
+		{semver.Version{Major: 1, Minor: 2, Patch: 3, Build: "build.005"}, "1.2.3+build.005"},
+		{semver.Version{Major: 1, Minor: 2, Patch: 3, Pre: "rc.2", Build: "build.005"}, "1.2.3-rc.2+build.005"},
+		{semver.Version{Major: ^uint64(0)}, "18446744073709551615.0.0"},
+	}
+	for _, c := range cases {
+		t.Run(c.text, func(t *testing.T) {
+			data, err := c.version.MarshalText()
+			if err != nil || string(data) != c.text {
+				t.Fatalf("MarshalText() = %q, %v; want %q", data, err, c.text)
+			}
+			restored := semver.Version{Major: 9, Minor: 8, Patch: 7, Pre: "old", Build: "old"}
+			if err := restored.UnmarshalText(data); err != nil || restored != c.version {
+				t.Fatalf("UnmarshalText(%q) = %v, %v; want %v", data, restored, err, c.version)
+			}
+		})
+	}
+	for _, text := range []string{"1.2", "1.2.3-01", "1.2.3+bad!", "01.2.3", "18446744073709551616.0.0"} {
+		t.Run("invalid/"+text, func(t *testing.T) {
+			before := semver.Version{Major: 9, Minor: 8, Patch: 7, Pre: "old", Build: "old"}
+			got := before
+			if err := got.UnmarshalText([]byte(text)); err == nil {
+				t.Fatal("invalid version accepted")
+			}
+			if got != before {
+				t.Fatalf("failed decode changed receiver: got %v; want %v", got, before)
+			}
+		})
+	}
+}

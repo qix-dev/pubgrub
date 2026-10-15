@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	pubgrub "pubgrub-go"
+	"github.com/qix-dev/pubgrub"
 )
 
 func TestStateCloneAndManualBacktrack(t *testing.T) {

@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	pubgrub "pubgrub-go"
-	"pubgrub-go/ranges"
-	"pubgrub-go/semver"
+	"github.com/qix-dev/pubgrub"
+	"github.com/qix-dev/pubgrub/ranges"
+	"github.com/qix-dev/pubgrub/semver"
 )
 
 type rustReference struct {

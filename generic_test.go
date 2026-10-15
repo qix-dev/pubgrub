@@ -7,8 +7,8 @@ import (
 	"slices"
 	"testing"
 
-	pubgrub "pubgrub-go"
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 // The solver must not require Go-comparable version values: real Python

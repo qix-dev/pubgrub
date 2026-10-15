@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 package pubgrub
 
-import "pubgrub-go/ranges"
+import "github.com/qix-dev/pubgrub/ranges"
 
 // Term is positive (the package must be selected in Set) or negative (the
 // package may be absent, or selected outside Set). These differ even when their

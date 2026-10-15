@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 type Version struct {

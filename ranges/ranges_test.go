@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 var ints = ranges.Ordered[int]()

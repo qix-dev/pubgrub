@@ -2,7 +2,7 @@
 package pubgrub_test
 
 import (
-	pubgrub "pubgrub-go"
+	"github.com/qix-dev/pubgrub"
 	"testing"
 )
 

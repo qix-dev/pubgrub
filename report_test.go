@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	pubgrub "pubgrub-go"
+	"github.com/qix-dev/pubgrub"
 )
 
 type proof = pubgrub.DerivationTree[string, int, intSet, string]

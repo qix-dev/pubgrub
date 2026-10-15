@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	pubgrub "pubgrub-go"
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 type intSet = ranges.Ranges[int]

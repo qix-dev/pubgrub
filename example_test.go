@@ -5,8 +5,8 @@ import (
 	"cmp"
 	"fmt"
 
-	pubgrub "pubgrub-go"
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 func ExampleResolve() {

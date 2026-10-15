@@ -6,7 +6,7 @@ package pubgrub
 
 import (
 	"fmt"
-	"pubgrub-go/ranges"
+	"github.com/qix-dev/pubgrub/ranges"
 )
 
 // VersionSet is the algebra required by PubGrub. Empty and Singleton use the

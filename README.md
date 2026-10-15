@@ -1,13 +1,12 @@
-# pubgrub-go
+# pubgrub
 
 Pure Go dependency resolution ported from `astral-pubgrub` and
-`astral-version-ranges`. Requires Go 1.24 or newer. The Go library has no external
-dependencies and does not call Rust, Python or C.
+`astral-version-ranges`. The Go library has no external dependencies and does
+not call Rust, Python or C. Requires Go 1.22 or newer.
 
 The reference source is the adjacent `../pubgrub` checkout at commit
 `e4ae64d371a25df953d42d9f0e8e0d43d8e79e6e`, declaring
 `astral-pubgrub` 0.6.1 and `astral-version-ranges` 0.2.2.
-The commit identifies the behavior more precisely than the crate version.
 
 ## Use
 
@@ -18,8 +17,8 @@ import (
     "cmp"
     "fmt"
 
-    pubgrub "pubgrub-go"
-    "pubgrub-go/ranges"
+    "github.com/qix-dev/pubgrub"
+    "github.com/qix-dev/pubgrub/ranges"
 )
 
 func main() {
@@ -41,9 +40,7 @@ func main() {
 }
 ```
 
-This example also runs as `ExampleResolve`. A consuming module can use a local
-`replace pubgrub-go => /absolute/path/to/pubgrub-go`; change the module path to
-your repository path when publishing.
+This example also runs as `ExampleResolve`.
 
 Use `ResolveContext` for cancellation through a Go `context.Context`. Provider
 errors are available through `errors.Is` and `errors.As`. To explain an
@@ -77,12 +74,7 @@ versions; missing offline metadata may otherwise be hidden by that simplificatio
 | `ranges/` | `version-ranges/src/lib.rs` | Canonical intervals, constructors, ordering, union/intersection/complement/difference, relation, batch membership, widen/narrow/simplify and JSON |
 | `semver/` | `version-ranges/src/semver.rs` | Optional SemVer requirement conversion, with full SemVer values and total ordering |
 
-Internal arenas use stable integer IDs into slices. Ordered assignment storage,
-an indexed binary heap, contradiction generations and dependency merging are
-retained. Rust-specific inline small containers and custom hashers are represented
-with Go slices and maps; their allocation layout is not reproduced.
-
-## Custom providers and Python integration
+## Custom providers
 
 `DependencyProvider[P, V, S, M, R]` separates metadata from the algorithm:
 
@@ -124,10 +116,6 @@ concurrently with a concurrency-safe provider.
 When widening a dependent version range, all *existing* versions in that range
 must have the supplied dependencies, and the set of existing versions must not
 grow during a resolution.
-
-This package is the generic PubGrub engine. Python PEP 440/508, package-index I/O,
-wheel compatibility and uv's environment-fork policy belong in a provider or the
-surrounding resolver.
 
 ## Compatibility details
 
@@ -190,9 +178,6 @@ The reference executable is test infrastructure only. Differential tests compare
 - 3,000 interval pairs: canonical results for every set operation, ordering,
   membership, display and the three simplification operations.
 - SemVer requirements and prerelease/build-aware version comparisons.
-
-The adjacent Rust checkout remains unchanged. Its commit is recorded above so
-future changes can be assessed against a precise baseline.
 
 ## License
 

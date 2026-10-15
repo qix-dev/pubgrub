@@ -3,7 +3,7 @@ package semver_test
 
 import (
 	"encoding/json"
-	"pubgrub-go/semver"
+	"github.com/qix-dev/pubgrub/semver"
 	"testing"
 )
 
